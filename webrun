@@ -18,15 +18,21 @@ sub downloader {
 
 
 use File::Temp qw(tempfile);
+use File::Basename;
+
 my @downloaded_files;
 
 # saves $data to a temp file,
 # stores that file's name in a @$list
 # and returns that name
 sub save_to_temp_file {
-    my ($data, $list) = @_;
+    my ($data, $list, $url) = @_;
 
-    my ($file, $name) = tempfile;
+    basename($url) =~ /.*(\..*)/;
+    my $suffix = $1;
+    $suffix =~ s/\?.*//;
+
+    my ($file, $name) = tempfile(SUFFIX => $suffix);
     push @$list, $name;
     print $file $data;
     close $file;
@@ -40,7 +46,9 @@ sub save_to_temp_file {
         if (m,^https?://,) {
             my $data;
             next if $dl->($_, \$data) != 0;
-            $_ = save_to_temp_file $data, \@downloaded_files;
+            $_ = save_to_temp_file($data,
+                                   \@downloaded_files,
+                                   $_);
         }
     }
 }
