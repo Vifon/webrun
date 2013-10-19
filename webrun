@@ -21,29 +21,38 @@ use File::Temp qw(tempfile);
 use File::Basename;
 
 
-# saves $data from $url in a temp file
+# saves $data from $url in a temporary file
 # and returns its name
 sub save_to_temp_file {
     my ($data, $url) = @_;
 
+    # try to guess the downloaded file's extension
     basename($url) =~ /.*(\..*)/;
     my $suffix = $1;
     $suffix =~ s/\?.*//;
 
-    my ($file, $name) = tempfile(SUFFIX => $suffix,
-                                 UNLINK => 1);
-    print $file $data;
-    close $file;
+    my ($fd, $name) = tempfile(SUFFIX => $suffix,
+                               UNLINK => 1);
+    print $fd $data;
+    close $fd;
     return $name;
 }
 
 
+# We use a new scope to allow the garbage collector to reclaim the unused memory
+# when we'll be done with processing ARGV.
+#
+# I don't know if it works but surely will not hurt.
 {
     my $dl = downloader;
     for (@ARGV) {
+        # if a given argument is an url
         if (m,^https?://,) {
             my $data;
+            # skip failed downloads
+            # TODO: should we remove them from ARGV?
             next if $dl->($_, \$data) != 0;
+            # replace the url in ARGV with a temporary file
             $_ = save_to_temp_file($data, $_);
         }
     }
