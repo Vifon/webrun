@@ -52,10 +52,13 @@ sub save_to_temp_file {
         if (m,^https?://,) {
             my $data;
             # skip failed downloads
-            # TODO: should we remove them from ARGV?
-            next if $dl->($_, \$data) != 0;
-            # replace the url in ARGV with a temporary file
-            $_ = save_to_temp_file($data, $_);
+            if ($dl->($_, \$data) != 0) {
+                # replace the url in ARGV with /dev/null
+                $_ = "/dev/null";
+            } else {
+                # replace the url in ARGV with a temporary file
+                $_ = save_to_temp_file($data, $_);
+            }
         }
     }
 }
