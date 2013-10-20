@@ -60,4 +60,5 @@ sub save_to_temp_file {
     }
 }
 
-system @ARGV;
+# not using exec because we have to unlink the temporary files later
+exit system @ARGV;
