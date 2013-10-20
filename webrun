@@ -27,9 +27,11 @@ sub save_to_temp_file {
     my ($data, $url) = @_;
 
     # try to guess the downloaded file's extension
-    basename($url) =~ /.*(\..*)/;
-    my $suffix = $1;
-    $suffix =~ s/\?.*//;
+    my $suffix = "";
+    if (basename($url) =~ /.*(\..*)/) {
+        $suffix = $1;
+        $suffix =~ s/\?.*//;
+    }
 
     my ($fd, $name) = tempfile(SUFFIX => $suffix,
                                UNLINK => 1);
