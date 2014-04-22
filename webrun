@@ -12,6 +12,7 @@ sub downloader {
 
         $curl->setopt(CURLOPT_URL       , $url);
         $curl->setopt(CURLOPT_WRITEDATA , $output);
+        $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
         $curl->perform;
     }
 }
