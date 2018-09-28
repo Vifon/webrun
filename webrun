@@ -3,20 +3,7 @@
 use warnings;
 use strict;
 
-use WWW::Curl::Easy;
-sub downloader {
-    my $curl = WWW::Curl::Easy->new;
-    # store a given $url's contents in the $output reference
-    sub {
-        my ($url, $output) = @_;
-
-        $curl->setopt(CURLOPT_URL       , $url);
-        $curl->setopt(CURLOPT_WRITEDATA , $output);
-        $curl->setopt(CURLOPT_FOLLOWLOCATION, 1);
-        $curl->perform;
-    }
-}
-
+use LWP::UserAgent;
 
 use File::Temp qw(tempfile);
 use File::Basename;
@@ -41,19 +28,20 @@ sub save_to_temp_file {
     return $name;
 }
 
-
-my $dl = downloader;
+my $ua = LWP::UserAgent->new;
+$ua->agent("webrun/1.0 ");
 for (@ARGV) {
     # if a given argument is an url
     if (m,^https?://,) {
-        my $data;
+        my $req = HTTP::Request->new(GET => $_);
+        my $res = $ua->request($req);
         # skip failed downloads
-        if ($dl->($_, \$data) != 0) {
+        if (not $res->is_success) {
             # replace the url in ARGV with /dev/null
             $_ = "/dev/null";
         } else {
             # replace the url in ARGV with a temporary file
-            $_ = save_to_temp_file($data, $_);
+            $_ = save_to_temp_file($res->content, $_);
         }
     }
 }
