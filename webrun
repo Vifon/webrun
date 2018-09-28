@@ -42,27 +42,21 @@ sub save_to_temp_file {
 }
 
 
-# We use a new scope to allow the garbage collector to reclaim the unused memory
-# when we'll be done with processing ARGV.
-#
-# I don't know if it works but surely will not hurt.
-{
-    my $dl = downloader;
-    for (@ARGV) {
-        # if a given argument is an url
-        if (m,^https?://,) {
-            my $data;
-            # skip failed downloads
-            if ($dl->($_, \$data) != 0) {
-                # replace the url in ARGV with /dev/null
-                $_ = "/dev/null";
-            } else {
-                # replace the url in ARGV with a temporary file
-                $_ = save_to_temp_file($data, $_);
-            }
+my $dl = downloader;
+for (@ARGV) {
+    # if a given argument is an url
+    if (m,^https?://,) {
+        my $data;
+        # skip failed downloads
+        if ($dl->($_, \$data) != 0) {
+            # replace the url in ARGV with /dev/null
+            $_ = "/dev/null";
+        } else {
+            # replace the url in ARGV with a temporary file
+            $_ = save_to_temp_file($data, $_);
         }
     }
 }
 
-# not using exec because we have to unlink the temporary files later
+# Using exec would prevent the tempfile removal.
 exit system @ARGV;
