@@ -10,10 +10,6 @@ webrun - a transparent compatibility layer with http/https protocol
 
 Prefix any command with "webrun" to automagically resolve any URLs in the argument list into the temporary files.
 
-=head1 DEPENDENCIES
-
-lib-www-curl-perl
-
 =head1 AUTHOR
 
 Webrun was written by Wojciech 'vifon' Siewierski <darkvifon at gmail dot com>.
